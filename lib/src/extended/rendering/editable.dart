@@ -49,6 +49,20 @@ class ExtendedRenderEditable extends _RenderEditable {
     this.supportSpecialText = false,
   });
 
+  Offset? get caretOffset {
+    if (selection != null) {
+      late TextSelection selec;
+      if (hasSpecialInlineSpanBase) {
+        selec = ExtendedTextLibraryUtils
+            .convertTextInputSelectionToTextPainterSelection(text!, selection!);
+      } else {
+        selec = selection!;
+      }
+      return _textPainter.getOffsetForCaret(selec.extent, _caretPrototype);
+    }
+    return null;
+  }
+
   bool _hasSpecialInlineSpanBase = false;
   bool supportSpecialText = false;
 

@@ -49,18 +49,27 @@ class ExtendedRenderEditable extends _RenderEditable {
     this.supportSpecialText = false,
   });
 
-  Offset? get caretOffset {
-    if (selection != null) {
-      late TextSelection selec;
-      if (hasSpecialInlineSpanBase) {
-        selec = ExtendedTextLibraryUtils
-            .convertTextInputSelectionToTextPainterSelection(text!, selection!);
+  // Small extension to get caretOffset
+  Future<Offset?> get caretOffset {
+    final Completer<Offset?> completer = Completer<Offset?>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (selection != null) {
+        late TextSelection selec;
+        if (hasSpecialInlineSpanBase) {
+          selec = ExtendedTextLibraryUtils
+              .convertTextInputSelectionToTextPainterSelection(
+                  text!, selection!);
+        } else {
+          selec = selection!;
+        }
+        completer.complete(
+          _textPainter.getOffsetForCaret(selec.extent, _caretPrototype),
+        );
       } else {
-        selec = selection!;
+        completer.complete(null);
       }
-      return _textPainter.getOffsetForCaret(selec.extent, _caretPrototype);
-    }
-    return null;
+    });
+    return completer.future;
   }
 
   bool _hasSpecialInlineSpanBase = false;
